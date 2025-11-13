@@ -5,33 +5,65 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Угадай животное</title>
 <style>
-  :root{--bg:#111;--panel:#1b1b1b;--accent:#06f;--ok:#8f8;--cell:#ddd}
-  html,body{height:100%;margin:0;background:var(--bg);color:#eee;font-family:Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:20px}
-  .app{width:920px;max-width:96%;display:flex;flex-direction:column;gap:14px;align-items:center}
-  .header{display:flex;gap:10px;align-items:center;width:100%;justify-content:space-between}
-  h1{margin:0;font-size:18px}
-  .controls{display:flex;gap:8px;align-items:center}
-  button{background:#2b6;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:#012}
-  .stage{background:var(--panel);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.6);width:100%;display:flex;gap:18px;align-items:center}
-  .preview{width:300px;height:300px;background:#ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .preview img{max-width:100%;max-height:100%;display:block}
-  .playarea{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px}
-  .slots{display:flex;gap:8px;min-height:56px;align-items:center;justify-content:center;flex-wrap:wrap}
-  .slot{width:44px;height:44px;border-radius:6px;border:2px dashed rgba(255,255,255,.08);background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;color:#222}
-  .slot.occupied{border-style:solid;background:#fff}
-  .pool{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:6px;max-width:640px}
-  .tile{width:44px;height:44px;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;cursor:grab;user-select:none;border:1px solid rgba(0,0,0,.08)}
-  .tile.dragging{opacity:.45}
-  .footer{display:flex;gap:8px;align-items:center;justify-content:center;width:100%}
-  .message{color:#bfb;text-align:center;font-weight:600}
-  .hidden{display:none}
-  /* flash animation */
+  :root {
+    --bg:#111;--panel:#1b1b1b;--accent:#06f;--ok:#8f8;--cell:#ddd;
+  }
+  html,body {
+    height:100%;margin:0;
+    background:var(--bg);color:#eee;
+    font-family:Arial,Helvetica,sans-serif;
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:10px;
+  }
+  .app {
+    width:100%;max-width:480px;
+    display:flex;flex-direction:column;gap:10px;align-items:center;
+  }
+  .header {
+    display:flex;gap:6px;align-items:center;
+    justify-content:space-between;width:100%;
+  }
+  h1 {
+    margin:0;font-size:16px;
+  }
+  button {
+    background:#2b6;border:0;padding:8px 10px;border-radius:8px;
+    cursor:pointer;color:#012;font-size:14px;touch-action:manipulation;
+  }
+  .stage {
+    background:var(--panel);padding:12px;border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.6);
+    width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;
+  }
+  .preview {
+    width:100%;max-width:320px;aspect-ratio:1;
+    background:#ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  .preview img {width:100%;height:100%;object-fit:contain;}
+  .slots {display:flex;gap:6px;min-height:56px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  .slot {
+    width:48px;height:48px;border-radius:6px;border:2px dashed rgba(255,255,255,.08);
+    background:transparent;display:flex;align-items:center;justify-content:center;
+    font-size:22px;color:#222;
+  }
+  .slot.occupied{border-style:solid;background:#fff;}
+  .pool {
+    display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:6px;
+    max-width:100%;
+  }
+  .tile {
+    width:48px;height:48px;border-radius:6px;background:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:22px;color:#111;
+    cursor:grab;user-select:none;border:1px solid rgba(0,0,0,.08);
+    touch-action:none; /* важно для touch-drag */
+  }
+  .tile.dragging {opacity:.5;position:fixed;z-index:999;pointer-events:none;}
+  .footer {display:flex;gap:8px;align-items:center;justify-content:center;width:100%;}
+  .message {color:#bfb;text-align:center;font-weight:600;font-size:15px;}
   @keyframes flashGreen {
-    0%{background:var(--bg)}
-    10%{background:var(--ok)}
-    40%{background:var(--bg)}
-    70%{background:var(--ok)}
-    100%{background:var(--bg)}
+    0%{background:var(--bg)}10%{background:var(--ok)}
+    40%{background:var(--bg)}70%{background:var(--ok)}100%{background:var(--bg)}
   }
 </style>
 </head>
@@ -42,295 +74,190 @@
       <div class="controls">
         <button id="prevBtn">◀️</button>
         <button id="nextBtn">▶️</button>
-        <button id="restartBtn">Играть сначала</button>
+        <button id="restartBtn">🔁</button>
       </div>
     </div>
 
     <div class="stage" id="stage">
-      <div class="preview" id="preview">
-        <!-- картинка -->
-      </div>
-
+      <div class="preview" id="preview"></div>
       <div class="playarea">
-        <div class="slots" id="slots" aria-live="polite"></div>
+        <div class="slots" id="slots"></div>
         <div class="pool" id="pool"></div>
       </div>
     </div>
 
     <div class="footer">
-      <div class="message" id="message">Соберите название животного, перетаскивая буквы в ячейки.</div>
+      <div class="message" id="message">Соберите название животного, перетаскивая буквы.</div>
     </div>
   </div>
 
 <script>
-/* Список животных — файл и правильное название (кириллица, без пробелов в середине).
-   Если хотите, можно сделать нормализацию (trim/lowercase) при сравнении. */
 const animals = [
-  {file: "Group.png", name: "лось"},
-  {file: "Group-1.png", name: "волк"},
-  {file: "Group-2.png", name: "лиса"},
-  {file: "Group-3.png", name: "медведь"},
-  {file: "Group-4.png", name: "олень"},
-  {file: "Group-5.png", name: "кабан"},
-  {file: "Group-6.png", name: "еж"},
-  {file: "Group-7.png", name: "бобер"},
-  {file: "Group-8.png", name: "заяц"},
-  {file: "Group-9.png", name: "белка"},
-  {file: "Group-10.png", name: "слон"},
-  {file: "Group-11.png", name: "лев"},
-  {file: "Group-12.png", name: "леопард"},
-  {file: "Group-13.png", name: "носорог"},
-  {file: "Group-14.png", name: "бегемот"},
-  {file: "Group-15.png", name: "жираф"},
-  {file: "Group-16.png", name: "гиена"},
-  {file: "Group-17.png", name: "зебра"},
-  {file: "Group-18.png", name: "фламинго"},
-  {file: "Group-19.png", name: "крокодил"},
-  {file: "Group-20.png", name: "пингвин"}
+  {file:"Group.png",name:"лось"},
+  {file:"Group-1.png",name:"волк"},
+  {file:"Group-2.png",name:"лиса"},
+  {file:"Group-3.png",name:"медведь"},
+  {file:"Group-4.png",name:"олень"},
+  {file:"Group-5.png",name:"кабан"},
+  {file:"Group-6.png",name:"еж"},
+  {file:"Group-7.png",name:"бобер"},
+  {file:"Group-8.png",name:"заяц"},
+  {file:"Group-9.png",name:"белка"}
 ];
 
-const preview = document.getElementById('preview');
-const slotsWrap = document.getElementById('slots');
-const pool = document.getElementById('pool');
-const message = document.getElementById('message');
-const stage = document.getElementById('stage');
+const preview=document.getElementById('preview');
+const slotsWrap=document.getElementById('slots');
+const pool=document.getElementById('pool');
+const message=document.getElementById('message');
+const stage=document.getElementById('stage');
 
-let index = 0;
-let tilesMap = new Map(); // tileId -> element
+let index=0,tileCounter=0,tilesMap=new Map();
 
-function normalizeName(name){
-  // убираем лишние пробелы и приводим к нижнему регистру
-  return name.trim().toLowerCase();
-}
+function normalizeName(name){return name.trim().toLowerCase();}
+function splitLetters(word){return Array.from(word);}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function clearContainers(){slotsWrap.innerHTML='';pool.innerHTML='';tilesMap.clear();}
 
-function splitLetters(word){
-  // корректно разбиваем на символы (учитывая UTF-8 кириллицу)
-  // Array.from корректно работает с кодовыми точками
-  return Array.from(word);
-}
-
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function clearContainers(){
-  slotsWrap.innerHTML = '';
-  pool.innerHTML = '';
-  tilesMap.clear();
-}
-
-function renderAnimal(idx){
+function renderAnimal(i){
   clearContainers();
-  const animal = animals[idx];
-  const name = normalizeName(animal.name);
-  const letters = splitLetters(name);
-  // preview image
-  preview.innerHTML = '';
-  const img = document.createElement('img');
-  img.src = 'images/' + animal.file;
-  img.alt = animal.name;
-  // если картинка не найдена — показать текст
-  img.onerror = ()=>{ preview.innerHTML = '<div style="color:#444">Изображение отсутствует</div>'; };
-  preview.appendChild(img);
-
-  // слоты: пустые дивы под количество букв
-  for(let i=0;i<letters.length;i++){
-    const s = document.createElement('div');
-    s.className = 'slot';
-    s.dataset.index = i;
-    s.dataset.expected = letters[i]; // ожидаемая буква в этом слоте
-    s.setAttribute('aria-label', 'ячейка '+(i+1));
-    s.addEventListener('dragover', onDragOver);
-    s.addEventListener('drop', onDrop);
+  const a=animals[i],letters=splitLetters(normalizeName(a.name));
+  preview.innerHTML=`<img src="image/${a.file}" alt="${a.name}" onerror="this.parentNode.textContent='(нет изображения)'" />`;
+  letters.forEach((ch,idx)=>{
+    const s=document.createElement('div');
+    s.className='slot';s.dataset.index=idx;s.dataset.expected=ch;
+    s.addEventListener('dragover',e=>e.preventDefault());
+    s.addEventListener('drop',onDrop);
     slotsWrap.appendChild(s);
-  }
-
-  // буквы внизу — перемешанные
-  const poolLetters = shuffle(letters);
-  poolLetters.forEach((ch, i)=>{
-    const t = createTile(ch);
-    pool.appendChild(t);
   });
-
-  message.textContent = 'Соберите слово: ' + animal.name.length + ' букв';
+  shuffle(letters).forEach(ch=>pool.appendChild(createTile(ch)));
+  message.textContent='Соберите слово: '+a.name.length+' букв';
 }
 
-// создаёт букву-тайл
-let tileCounter = 0;
 function createTile(ch){
-  const t = document.createElement('div');
-  t.className = 'tile';
-  const id = 'tile-' + (tileCounter++);
-  t.id = id;
-  t.draggable = true;
-  t.textContent = ch;
-  t.dataset.letter = ch;
-  t.addEventListener('dragstart', onDragStart);
-  t.addEventListener('dragend', onDragEnd);
-  tilesMap.set(id, t);
+  const t=document.createElement('div');
+  const id='tile-'+(tileCounter++);
+  t.id=id;t.className='tile';t.textContent=ch;t.dataset.letter=ch;t.draggable=true;
+  tilesMap.set(id,t);
+  t.addEventListener('dragstart',onDragStart);
+  t.addEventListener('dragend',onDragEnd);
+  t.addEventListener('touchstart',onTouchStart,{passive:false});
   return t;
 }
 
-/* Drag & Drop логика:
-   - перетаскиваемой является .tile
-   - можно бросить tile в .slot или в другой .tile (для обмена)
-   - при drop в слот: если слот пуст — поместить; если занят — поменять.
-   - при drop в pool: вернуть букву (swap если нужно).
-*/
+let dragId=null,dragTile=null;
+function onDragStart(e){dragId=e.target.id;e.target.classList.add('dragging');}
+function onDragEnd(e){e.target.classList.remove('dragging');dragId=null;checkWinCondition();}
 
-let dragId = null;
-function onDragStart(e){
-  dragId = e.target.id;
-  e.dataTransfer.setData('text/plain', dragId);
-  e.target.classList.add('dragging');
-}
-function onDragEnd(e){
-  e.target.classList.remove('dragging');
-  dragId = null;
-}
-function onDragOver(e){
-  e.preventDefault(); // нужно, чтобы можно было бросить
-}
 function onDrop(e){
   e.preventDefault();
-  const dest = e.currentTarget; // слот
-  const tileId = e.dataTransfer.getData('text/plain') || dragId;
-  if(!tileId) return;
-  const tile = tilesMap.get(tileId);
-  if(!tile) return;
-
-  // Если слот содержит другую букву — поменяем их местами
-const existing = dest.querySelector('.tile');
-const tileParent = tile.parentElement;
-
-if (existing && tileParent) {
-  // Временные "пустышки", чтобы swap был стабильным
-  const placeholder1 = document.createElement('div');
-  const placeholder2 = document.createElement('div');
-  tileParent.replaceChild(placeholder1, tile);
-  dest.replaceChild(placeholder2, existing);
-  tileParent.replaceChild(existing, placeholder1);
-  dest.replaceChild(tile, placeholder2);
-} else {
-  // просто переносим
-  if (tileParent) tileParent.removeChild(tile);
-  dest.appendChild(tile);
+  const dest=e.currentTarget,tileId=e.dataTransfer?.getData('text/plain')||dragId;
+  if(!tileId)return;
+  const tile=tilesMap.get(tileId),existing=dest.querySelector('.tile');
+  if(!tile)return;
+  const parent=tile.parentElement;
+  if(existing&&parent){
+    const ph1=document.createElement('div'),ph2=document.createElement('div');
+    parent.replaceChild(ph1,tile);dest.replaceChild(ph2,existing);
+    parent.replaceChild(existing,ph1);dest.replaceChild(tile,ph2);
+  }else{
+    parent?.removeChild(tile);dest.appendChild(tile);
+  }
+  updateSlots();checkWinCondition();
 }
 
-  // пометить слот как занятый
-  Array.from(slotsWrap.children).forEach(s=>{
-    s.classList.toggle('occupied', !!s.querySelector('.tile'));
-  });
-
-  checkWinCondition();
-}
-
-// Обработка drop в pool (вернуть букву обратно в пул / swap)
-pool.addEventListener('dragover', onDragOver);
-pool.addEventListener('drop', e=>{
+pool.addEventListener('dragover',e=>e.preventDefault());
+pool.addEventListener('drop',e=>{
   e.preventDefault();
-  const tileId = e.dataTransfer.getData('text/plain') || dragId;
-  if(!tileId) return;
-  const tile = tilesMap.get(tileId);
-  if(!tile) return;
-  const prevParent = tile.parentElement;
-  // если в пуле на месте уже есть другая буква — просто вставляем в конец
-  if(prevParent !== pool){
-    prevParent && prevParent.removeChild(tile);
-    pool.appendChild(tile);
-  }
-  // обновить occupied классы
-  Array.from(slotsWrap.children).forEach(s=>{
-    s.classList.toggle('occupied', !!s.querySelector('.tile'));
-  });
-  checkWinCondition();
+  const tileId=e.dataTransfer?.getData('text/plain')||dragId;
+  if(!tileId)return;
+  const tile=tilesMap.get(tileId);
+  tile?.parentElement?.removeChild(tile);
+  pool.appendChild(tile);
+  updateSlots();checkWinCondition();
 });
 
-// также добавим возможность кликать: клик по tile помещает в первый пустой слот, если есть
-pool.addEventListener('click', e=>{
-  const t = e.target.closest('.tile');
-  if(!t) return;
-  // найти первый пустой слот
-  const empty = Array.from(slotsWrap.children).find(s=>!s.querySelector('.tile'));
-  if(empty){
-    const prevParent = t.parentElement;
-    prevParent && prevParent.removeChild(t);
-    empty.appendChild(t);
-    Array.from(slotsWrap.children).forEach(s=>{
-      s.classList.toggle('occupied', !!s.querySelector('.tile'));
-    });
-    checkWinCondition();
-  }
+pool.addEventListener('click',e=>{
+  const t=e.target.closest('.tile');if(!t)return;
+  const empty=[...slotsWrap.children].find(s=>!s.querySelector('.tile'));
+  if(empty){t.parentElement.removeChild(t);empty.appendChild(t);updateSlots();checkWinCondition();}
 });
 
-// Проверка: все ли буквы в слотах и в правильном порядке
+function updateSlots(){
+  [...slotsWrap.children].forEach(s=>s.classList.toggle('occupied',!!s.querySelector('.tile')));
+}
+
 function checkWinCondition(){
-  const slotElems = Array.from(slotsWrap.children);
-  // если хотя бы один слот пуст — не готово
-  if(slotElems.some(s=>!s.querySelector('.tile'))) return false;
-  // иначе сравнить
-  const ok = slotElems.every(s=>{
-    const t = s.querySelector('.tile');
-    const expected = s.dataset.expected;
-    return t && t.dataset.letter === expected;
+  const s=[...slotsWrap.children];
+  if(s.some(el=>!el.querySelector('.tile')))return;
+  const ok=s.every(el=>{
+    const t=el.querySelector('.tile');return t&&t.dataset.letter===el.dataset.expected;
   });
-  if(ok) onWin();
-  return ok;
+  if(ok)onWin();
 }
 
 function onWin(){
-  // flash stage зелёным, затем следующий
-  stage.style.animation = 'flashGreen 700ms ease-in-out';
-  setTimeout(()=>{ stage.style.animation = ''; }, 800);
-  // небольшой звук/сообщение
-  message.textContent = 'Правильно! Загружаем следующее...';
-  setTimeout(()=>{ nextAnimal(); }, 900);
+  stage.style.animation='flashGreen 700ms ease-in-out';
+  setTimeout(()=>stage.style.animation='',800);
+  message.textContent='Правильно!';
+  setTimeout(()=>nextAnimal(),800);
 }
 
 function nextAnimal(){
   index++;
-  if(index >= animals.length){
-    // конец
-    message.textContent = 'Молодец! Вы прошли все животные.';
-    showFinal();
-    return;
-  }
+  if(index>=animals.length){message.textContent='Все животные пройдены!';return;}
   renderAnimal(index);
 }
+function prevAnimal(){if(index>0){index--;renderAnimal(index);}}
+function startOver(){index=0;tileCounter=0;renderAnimal(index);}
 
-function prevAnimal(){
-  if(index > 0){
-    index--;
-    renderAnimal(index);
-  }
-}
-
-function showFinal(){
-  clearContainers();
-  preview.innerHTML = '<div style="color:#ddd;font-weight:600">Все животные пройдены</div>';
-  message.innerHTML = 'Игра окончена. <button id="replay">Играть снова</button>';
-  document.getElementById('replay').addEventListener('click', ()=>{ startOver(); });
-}
-
-function startOver(){
-  index = 0;
-  tileCounter = 0;
-  renderAnimal(index);
-  message.textContent = 'Соберите слово, перетаскивая буквы.';
-}
-
-document.getElementById('nextBtn').addEventListener('click', ()=>{ nextAnimal(); });
-document.getElementById('prevBtn').addEventListener('click', ()=>{ prevAnimal(); });
-document.getElementById('restartBtn').addEventListener('click', ()=>{ startOver(); });
-
-// инициализация
+document.getElementById('nextBtn').onclick=nextAnimal;
+document.getElementById('prevBtn').onclick=prevAnimal;
+document.getElementById('restartBtn').onclick=startOver;
 startOver();
+
+/* === Touch drag logic === */
+let touchStartX=0,touchStartY=0;
+
+function onTouchStart(e){
+  const t=e.target.closest('.tile');if(!t)return;
+  e.preventDefault();
+  dragTile=t;
+  const touch=e.touches[0];
+  touchStartX=touch.clientX;touchStartY=touch.clientY;
+  const rect=t.getBoundingClientRect();
+  t.classList.add('dragging');
+  t.style.left=rect.left+'px';
+  t.style.top=rect.top+'px';
+  document.addEventListener('touchmove',onTouchMove,{passive:false});
+  document.addEventListener('touchend',onTouchEnd);
+}
+
+function onTouchMove(e){
+  if(!dragTile)return;
+  const touch=e.touches[0];
+  e.preventDefault();
+  dragTile.style.left=(touch.clientX-24)+'px';
+  dragTile.style.top=(touch.clientY-24)+'px';
+}
+
+function onTouchEnd(e){
+  if(!dragTile)return;
+  const touch=e.changedTouches[0];
+  const x=touch.clientX,y=touch.clientY;
+  dragTile.classList.remove('dragging');
+  dragTile.style.left='';dragTile.style.top='';
+  const dropTarget=document.elementFromPoint(x,y);
+  const slot=dropTarget?.closest('.slot');
+  if(slot){
+    slot.appendChild(dragTile);
+  }else{
+    pool.appendChild(dragTile);
+  }
+  dragTile=null;
+  document.removeEventListener('touchmove',onTouchMove);
+  document.removeEventListener('touchend',onTouchEnd);
+  updateSlots();checkWinCondition();
+}
 </script>
 </body>
 </html>
-
